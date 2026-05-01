@@ -7,9 +7,19 @@ def emotion_detector(text_to_analyze):
     input_json = {"raw_document": {"text": text_to_analyze}}
     
     response = requests.post(url, json=input_json, headers=headers)
-    response_dict = json.loads(response.text)
     
-    # Extraire les émotions
+    # Gestion erreur 400 — entrée vide
+    if response.status_code == 400:
+        return {
+            'anger': None,
+            'disgust': None,
+            'fear': None,
+            'joy': None,
+            'sadness': None,
+            'dominant_emotion': None
+        }
+    
+    response_dict = json.loads(response.text)
     emotions = response_dict['emotionPredictions'][0]['emotion']
     
     anger_score = emotions['anger']
@@ -18,7 +28,6 @@ def emotion_detector(text_to_analyze):
     joy_score = emotions['joy']
     sadness_score = emotions['sadness']
     
-    # Trouver l'émotion dominante
     dominant_emotion = max(emotions, key=emotions.get)
     
     return {
@@ -29,6 +38,3 @@ def emotion_detector(text_to_analyze):
         'sadness': sadness_score,
         'dominant_emotion': dominant_emotion
     }
-
-if __name__ == "__main__":
-    print(emotion_detector("I am so happy today!"))
